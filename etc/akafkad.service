@@ -1,0 +1,12 @@
+[Unit]
+Description=Kafka importer for AMiner
+
+[Service]
+Type=simple
+User=aminer
+Group=aminer
+ExecStart=/usr/lib/akafka/akafkad.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
