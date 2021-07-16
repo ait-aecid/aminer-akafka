@@ -22,4 +22,3 @@ jobs:
           IMAGE_NAME: "aitaecid/akafka"
           TAG_NAME: "v0.9"
           LATEST: "true"
-
