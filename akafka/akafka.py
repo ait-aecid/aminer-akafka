@@ -9,15 +9,15 @@ import threading
 import logging
 import json
 import copy
+import re
 from kafka import KafkaConsumer
-
 
 class Akafka:
     DEFAULT_CONFIG = {
         'bootstrap_servers': 'localhost:9092',
     }
 
-    def __init__(self, topics, **configs):
+    def __init__(self, *topics, **configs):
         self.config = copy.copy(self.DEFAULT_CONFIG)
         self.timer = None
         self.stopper = False
@@ -25,11 +25,13 @@ class Akafka:
         self.sock = None
         self.use_state = False
         self.topics = topics
+        self.filterlist = None
+
         self.logger = logging.getLogger(__name__)
 
         for key in self.config:
             if key in configs:
-                self.config[key] = configs[key]
+               self.config[key] = configs[key]
 
         self.consumer = None
         if self.use_state is True:
@@ -41,19 +43,30 @@ class Akafka:
         """
         self.logger = logger
 
+    def filter(self, value):
+        if isinstance(self.filterlist, list):
+            for f in self.filterlist:
+                if re.findall(f, str(value)):
+                    return True
+            return False
+        else:
+            return True
+
     def handler(self):
         """Scheduler-function that polls kafka
 
         """
-        self.consumer = KafkaConsumer(self.topics, **self.config)
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4)
-        for msg in self.consumer:
-            # print('THE MESSAGE IS HERE. key:' + msg.key + ' value:' + msg.value)
-            print('THE MESSAGE IS HERE')
-            pp.pprint(msg)
-            self.sock.send(msg.value)
-            self.sock.send('\n'.encode())
+        self.consumer = KafkaConsumer(**self.config)
+        self.consumer.subscribe(self.topics)
+        try:
+            for msg in self.consumer:
+                if self.filter(msg.value) is True:
+                   self.logger.debug(msg.value)
+                   self.sock.send(msg.value)
+                   self.sock.send('\n'.encode())
+        except OSError:       
+            self.logger.error("Client disconnected", exc_info=False)
+            self.stopper = True
 
             
 

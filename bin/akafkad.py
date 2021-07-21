@@ -18,6 +18,7 @@ import signal
 sys.path = sys.path[1:]+['/usr/lib/akafka']
 from metadata import __version_string__, __version__  # skipcq: FLK-E402
 from akafka import Akafka # skipcq: FLK-E402
+import ast
 
 CONFIGFILE = '/etc/aminer/kafka.conf'
 unixpath = "/var/lib/akafka/aminer.sock"
@@ -36,7 +37,6 @@ def main():
     global ak
     global unixpath
     global CONFIGFILE
-    topics = 'aminer'
     description="A daemon that polls logs from kafka-topics and writes it to a unix-domain-socket(for logdata-anomaly-miner)"
 
     parser = argparse.ArgumentParser(description=description)
@@ -46,6 +46,7 @@ def main():
     config = configparser.ConfigParser()
     config.read(CONFIGFILE)
     options = dict(config.items("DEFAULT"))
+    kafka_options = dict(config.items("KAFKA"))
     logger = False
 
     try:
@@ -55,9 +56,9 @@ def main():
 
     logger = logging.getLogger()
 
-    for key, val in options.items():
+    for key, val in kafka_options.items():
         try:
-            options[key] = int(val)
+            kafka_options[key] = int(val)
         except:
             pass
 
@@ -67,10 +68,15 @@ def main():
     if os.path.exists(unixpath):
         os.remove(unixpath)
 
+    topics = ast.literal_eval(options.get('topics'))
+
     logger.info("starting akafka daemon...")
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.bind(unixpath)
-    ak = Akafka(topics,**options)
+    ak = Akafka(*topics,**kafka_options)
+
+    if options.get('filters'):
+        ak.filterlist = ast.literal_eval(options.get('filters'))
 
     try:
         while True:

@@ -7,8 +7,8 @@ __email__ = "aecid@ait.ac.at"
 __website__ = "https://aecid.ait.ac.at"
 __license__ = "GPLv3"
 __maintainer__ = "Markus Wurzenberger"
-__status__ = "Development"
-__version__ = "0.9"
+__status__ = "Production"
+__version__ = "1.0"
 __version_string__ = """   (Austrian Institute of Technology)\n       (%s)\n            Version: %s""" % (__website__, __version__)
 __all__ = ['__authors__', '__contact__', '__copyright__', '__date__', '__deprecated__', '__email__', '__website__', '__license__',
            '__maintainer__', '__status__', '__version__', '__version_string__']
