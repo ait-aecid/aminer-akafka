@@ -9,6 +9,7 @@ install: init
 	test -d /etc/systemd/system && cp etc/akafkad.service /etc/systemd/system/akafkad.service
 	test -d /var/lib/akafka || mkdir /var/lib/akafka
 	cp bin/akafkad.py /usr/lib/akafka/akafkad.py
+	chmod 755 /usr/lib/akafka/akafkad.py
 	test -e /usr/local/bin/akafkad.py || ln -s /usr/lib/akafka/akafkad.py /usr/local/bin/akafkad.py
 
 uninstall:
