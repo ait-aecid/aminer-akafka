@@ -2,8 +2,6 @@
 
 This daemon polls logs from kafka topics and writes it to a unix-domain-socket(for [logdata-anomaly-miner](https://github.com/ait-aecid/logdata-anomaly-miner.git))
 
-**please note that this project is  work in progress**
-
 # Installation
 
 ```
