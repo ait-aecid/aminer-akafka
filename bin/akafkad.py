@@ -33,6 +33,35 @@ def exitgracefully(signum, frame):
     ak.close()
     sys.exit(0)
 
+def read_config():
+    global CONFIGFILE
+    options = dict()
+    kafka_options = dict()
+    config = configparser.ConfigParser()
+    try:
+        config.read(CONFIGFILE)
+        options = dict(config.items("DEFAULT"))
+        kafka_options = dict(config.items("KAFKA"))
+    except:
+        options['unixpath'] = unixpath
+        options['topics'] = "['aminer']"
+        kafka_options['bootstrap_servers'] = "localhost:9092"
+
+    if 'KAFKA_TOPICS' in os.environ:
+        options['topics'] = os.environ.get('KAFKA_TOPICS')
+
+    if 'AKAFKA_UNIXPATH' in os.environ:
+        options['unixpath'] = os.environ.get('AKAFKA_UNIXPATH')
+
+    if 'KAFKA_BOOTSTRAP_SERVERS' in os.environ:
+        kafka_options['bootstrap_servers'] = os.environ.get('KAFKA_BOOTSTRAP_SERVERS')
+
+    if 'AKAFKA_FILTERS' in os.environ:
+        options['filters'] = os.environ.get('AKAFKA_FILTERS')
+
+    return options,kafka_options
+
+
 def main():
     global ak
     global unixpath
@@ -43,10 +72,7 @@ def main():
     parser.add_argument('-v', '--version', action='version', version=__version_string__)
     args = parser.parse_args()
 
-    config = configparser.ConfigParser()
-    config.read(CONFIGFILE)
-    options = dict(config.items("DEFAULT"))
-    kafka_options = dict(config.items("KAFKA"))
+    options,kafka_options = read_config()
     logger = False
 
     try:
