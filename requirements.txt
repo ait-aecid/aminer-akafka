@@ -1,1 +1,2 @@
 kafka-python
+dictfilter>=2.1

@@ -10,7 +10,9 @@ import logging
 import json
 import copy
 import re
+import ast
 from kafka import KafkaConsumer
+from dictfilter import query
 
 class Akafka:
     DEFAULT_CONFIG = {
@@ -26,17 +28,42 @@ class Akafka:
         self.use_state = False
         self.topics = topics
         self.searchlist = None
+        self.filters = False
+        self.filters_delim = '.'
 
         self.logger = logging.getLogger(__name__)
 
         for key in self.config:
             if key in configs:
-               self.config[key] = configs[key]
+                self.config[key] = configs[key]
 
         self.consumer = None
         if self.use_state is True:
             self.loadstate()
         self.logger.debug(self.sort)
+
+    def setfilter(self, filters):
+        if isinstance(filters, str):
+            self.filters = ast.literal_eval(filters)
+            if not isinstance(self.filters, list):
+                self.logger.info("Warning: conf-parameter filters is not a list!")
+                self.filters = None
+
+    def displayfilter(self,hit):
+        try:
+            json.loads(hit)
+        except json.decoder.JSONDecodeError:
+            return hit
+
+        if self.filters is None:
+            return json.dumps(hit).encode("ascii")
+        else:
+            ret = {}
+            ret = query(hit, self.filters, delimiter=self.filters_delim)
+            if ret:
+                return json.dumps(ret).encode("ascii")
+            else:
+                return False
 
     def setlogger(self, logger):
         """Define a logger for this module
@@ -62,8 +89,10 @@ class Akafka:
             for msg in self.consumer:
                 if self.search(msg.value) is True:
                    self.logger.debug(msg.value)
-                   self.sock.send(msg.value)
-                   self.sock.send('\n'.encode())
+                   data = self.displayfilter(msg.value)
+                   if data:
+                       self.sock.send(data)
+                       self.sock.send('\n'.encode())
         except OSError:       
             self.logger.error("Client disconnected", exc_info=False)
             self.stopper = True

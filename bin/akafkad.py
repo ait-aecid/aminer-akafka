@@ -59,6 +59,10 @@ def read_config():
     if 'AKAFKA_SEARCH' in os.environ:
         options['search'] = os.environ.get('AKAFKA_SEARCH')
 
+    if 'AKAFKA_FILTERS' in os.environ:
+        options['filters'] = os.environ.get('AKAFKA_FILTERS')
+
+
     return options,kafka_options
 
 
@@ -103,6 +107,8 @@ def main():
 
     if options.get('search'):
         ak.filterlist = ast.literal_eval(options.get('search'))
+    if options.get('filters'):
+        ak.setfilter(options.get('filters'))
 
     try:
         while True:
