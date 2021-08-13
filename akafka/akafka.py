@@ -25,7 +25,7 @@ class Akafka:
         self.sock = None
         self.use_state = False
         self.topics = topics
-        self.filterlist = None
+        self.searchlist = None
 
         self.logger = logging.getLogger(__name__)
 
@@ -43,9 +43,9 @@ class Akafka:
         """
         self.logger = logger
 
-    def filter(self, value):
-        if isinstance(self.filterlist, list):
-            for f in self.filterlist:
+    def search(self, value):
+        if isinstance(self.searchlist, list):
+            for f in self.searchlist:
                 if re.findall(f, str(value)):
                     return True
             return False
@@ -60,7 +60,7 @@ class Akafka:
         self.consumer.subscribe(self.topics)
         try:
             for msg in self.consumer:
-                if self.filter(msg.value) is True:
+                if self.search(msg.value) is True:
                    self.logger.debug(msg.value)
                    self.sock.send(msg.value)
                    self.sock.send('\n'.encode())

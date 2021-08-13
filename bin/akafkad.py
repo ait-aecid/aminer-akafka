@@ -56,8 +56,8 @@ def read_config():
     if 'KAFKA_BOOTSTRAP_SERVERS' in os.environ:
         kafka_options['bootstrap_servers'] = os.environ.get('KAFKA_BOOTSTRAP_SERVERS')
 
-    if 'AKAFKA_FILTERS' in os.environ:
-        options['filters'] = os.environ.get('AKAFKA_FILTERS')
+    if 'AKAFKA_SEARCH' in os.environ:
+        options['search'] = os.environ.get('AKAFKA_SEARCH')
 
     return options,kafka_options
 
@@ -101,8 +101,8 @@ def main():
     sock.bind(unixpath)
     ak = Akafka(*topics,**kafka_options)
 
-    if options.get('filters'):
-        ak.filterlist = ast.literal_eval(options.get('filters'))
+    if options.get('search'):
+        ak.filterlist = ast.literal_eval(options.get('search'))
 
     try:
         while True:
