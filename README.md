@@ -46,7 +46,7 @@ Normally the daemon starts polling the elasticsearch as soon as some other progr
 It is possible to read from the socket manually using ncat(from nmap) as follows:
 
 ```
-sudo ncat -U /var/lib/aminer/aminer.sock
+sudo ncat -U /var/lib/akafka/aminer.sock
 ```
 
 # Uninstall
