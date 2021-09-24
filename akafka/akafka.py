@@ -11,6 +11,7 @@ import json
 import copy
 import re
 import ast
+import datetime
 from kafka import KafkaConsumer
 from dictfilter import query
 
@@ -53,10 +54,12 @@ class Akafka:
         try:
             json.loads(hit)
         except json.decoder.JSONDecodeError:
+            self.logger.debug("displayfilter: %s" % hit)
             return hit
 
-        if self.filters is None:
-            return json.dumps(hit).encode("ascii")
+        if self.filters is False:
+            self.logger.debug("displayfilter with filters is FALSE: %s" % hit)
+            return hit
         else:
             ret = {}
             ret = query(hit, self.filters, delimiter=self.filters_delim)
@@ -91,6 +94,7 @@ class Akafka:
                    self.logger.debug(msg.value)
                    data = self.displayfilter(msg.value)
                    if data:
+                       self.logger.debug("Sending data: %s" % data)
                        self.sock.send(data)
                        self.sock.send('\n'.encode())
         except OSError:       
@@ -148,6 +152,7 @@ class Akafka:
         """Stops the socket and the scheduler
         """
         self.logger.debug("Cleaning up socket and scheduler")
+        self.consumer.unsubscribe()
         self.stopper = True
         if self.sock is not None:
             self.sock.close()
