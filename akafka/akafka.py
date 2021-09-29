@@ -52,7 +52,7 @@ class Akafka:
 
     def displayfilter(self,hit):
         try:
-            json.loads(hit)
+            json_hit = json.loads(hit)
         except json.decoder.JSONDecodeError:
             self.logger.debug("displayfilter: %s" % hit)
             return hit
@@ -62,7 +62,7 @@ class Akafka:
             return hit
         else:
             ret = {}
-            ret = query(hit, self.filters, delimiter=self.filters_delim)
+            ret = query(json_hit, self.filters, delimiter=self.filters_delim)
             if ret:
                 return json.dumps(ret).encode("ascii")
             else:

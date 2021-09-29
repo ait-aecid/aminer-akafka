@@ -1,6 +1,11 @@
 init:
 	pip3 install -r requirements.txt
 
+.PHONY: test
+
+test:
+	python3 -m unittest discover .
+
 install: init
 	test -d /usr/lib/akafka || mkdir -p /usr/lib/akafka
 	cp -r akafka/* /usr/lib/akafka/
@@ -15,3 +20,4 @@ install: init
 uninstall:
 	rm -rf /usr/lib/akafka
 	unlink /usr/local/bin/akafkad.py
+

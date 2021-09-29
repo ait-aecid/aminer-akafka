@@ -106,7 +106,7 @@ def main():
     ak = Akafka(*topics,**kafka_options)
 
     if options.get('search'):
-        ak.filterlist = ast.literal_eval(options.get('search'))
+        ak.searchlist = ast.literal_eval(options.get('search'))
     if options.get('filters'):
         ak.setfilter(options.get('filters'))
 
