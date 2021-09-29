@@ -25,7 +25,8 @@ The following environment variables are available:
 | KAFKA_TOPICS         | `['aminer','logs']` | List of topics |
 | AKAFKA_UNIXPATH      | /var/lib/akafka/aminer.sock | Path to the unix domain socket |
 | KAFKA_BOOTSTRAP_SERVERS | localhost:9092 | Kafka server and port |
-| AKAFKA_FILTERS       | `['.*example.com.*']` | List of regex filters |
+| AKAFKA_SEARCH        | `['.*example.com.*']` | List of regex-patterns to filter specific events |
+| AKAFKA_FILTERS       | `['@metadata.type','@timestamp']` |
 
 # Poll manually
 

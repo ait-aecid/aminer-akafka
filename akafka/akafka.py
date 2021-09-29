@@ -10,7 +10,10 @@ import logging
 import json
 import copy
 import re
+import ast
+import datetime
 from kafka import KafkaConsumer
+from dictfilter import query
 
 class Akafka:
     DEFAULT_CONFIG = {
@@ -25,27 +28,54 @@ class Akafka:
         self.sock = None
         self.use_state = False
         self.topics = topics
-        self.filterlist = None
+        self.searchlist = None
+        self.filters = False
+        self.filters_delim = '.'
 
         self.logger = logging.getLogger(__name__)
 
         for key in self.config:
             if key in configs:
-               self.config[key] = configs[key]
+                self.config[key] = configs[key]
 
         self.consumer = None
         if self.use_state is True:
             self.loadstate()
         self.logger.debug(self.sort)
 
+    def setfilter(self, filters):
+        if isinstance(filters, str):
+            self.filters = ast.literal_eval(filters)
+            if not isinstance(self.filters, list):
+                self.logger.info("Warning: conf-parameter filters is not a list!")
+                self.filters = None
+
+    def displayfilter(self,hit):
+        try:
+            json_hit = json.loads(hit)
+        except json.decoder.JSONDecodeError:
+            self.logger.debug("displayfilter: %s" % hit)
+            return hit
+
+        if self.filters is False:
+            self.logger.debug("displayfilter with filters is FALSE: %s" % hit)
+            return hit
+        else:
+            ret = {}
+            ret = query(json_hit, self.filters, delimiter=self.filters_delim)
+            if ret:
+                return json.dumps(ret).encode("ascii")
+            else:
+                return False
+
     def setlogger(self, logger):
         """Define a logger for this module
         """
         self.logger = logger
 
-    def filter(self, value):
-        if isinstance(self.filterlist, list):
-            for f in self.filterlist:
+    def search(self, value):
+        if isinstance(self.searchlist, list):
+            for f in self.searchlist:
                 if re.findall(f, str(value)):
                     return True
             return False
@@ -60,10 +90,13 @@ class Akafka:
         self.consumer.subscribe(self.topics)
         try:
             for msg in self.consumer:
-                if self.filter(msg.value) is True:
+                if self.search(msg.value) is True:
                    self.logger.debug(msg.value)
-                   self.sock.send(msg.value)
-                   self.sock.send('\n'.encode())
+                   data = self.displayfilter(msg.value)
+                   if data:
+                       self.logger.debug("Sending data: %s" % data)
+                       self.sock.send(data)
+                       self.sock.send('\n'.encode())
         except OSError:       
             self.logger.error("Client disconnected", exc_info=False)
             self.stopper = True
@@ -119,6 +152,7 @@ class Akafka:
         """Stops the socket and the scheduler
         """
         self.logger.debug("Cleaning up socket and scheduler")
+        self.consumer.unsubscribe()
         self.stopper = True
         if self.sock is not None:
             self.sock.close()
