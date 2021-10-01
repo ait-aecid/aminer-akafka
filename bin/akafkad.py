@@ -111,13 +111,14 @@ def main():
         ak.setfilter(options.get('filters'))
 
     try:
+        sock.listen(0)
         while True:
-            sock.listen(1)
             logger.debug("Socket: Waiting for connection...")
             conn, addr = sock.accept()
-            logger.debug("Socket-connection accepted")
-            ak.setsock(conn)
-            ak.run()
+            with conn:
+                logger.debug("Socket-connection accepted!")
+                ak.setsock(conn)
+                ak.run()
     except KeyboardInterrupt:
         ak.close()
 
