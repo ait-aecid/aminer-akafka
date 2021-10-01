@@ -37,7 +37,9 @@ def read_config():
     global CONFIGFILE
     options = dict()
     kafka_options = dict()
-    config = configparser.ConfigParser()
+    # GENERAL section allows to use DEFAULT without being
+    # added automatically to all the other sections.
+    config = configparser.ConfigParser(default_section="GENERAL")
     try:
         config.read(CONFIGFILE)
         options = dict(config.items("DEFAULT"))
