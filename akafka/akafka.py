@@ -35,8 +35,8 @@ class Akafka:
         self.logger = logging.getLogger(__name__)
 
         for key in self.config:
-            if key in configs:
-                self.config[key] = configs[key]
+#            if key in configs:
+            self.config[key] = configs[key]
 
         self.consumer = None
         if self.use_state is True:
