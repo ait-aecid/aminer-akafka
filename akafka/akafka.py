@@ -89,6 +89,7 @@ class Akafka:
         self.consumer = KafkaConsumer(**self.config)
         self.consumer.subscribe(self.topics)
         try:
+            self.sock.send('\n'.encode())
             for msg in self.consumer:
                 if self.search(msg.value) is True:
                    self.logger.debug(msg.value)
@@ -155,6 +156,7 @@ class Akafka:
         self.consumer.unsubscribe()
         self.stopper = True
         if self.sock is not None:
+            self.logger.debug("Closing socket...")
             self.sock.close()
         if self.use_state is True:
             self.savestate()
