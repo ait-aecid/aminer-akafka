@@ -95,14 +95,26 @@ def main():
     if options.get('unixpath'):
         unixpath = options.get('unixpath')
 
-    if os.path.exists(unixpath):
-        os.remove(unixpath)
+    try:
+        if os.path.exists(unixpath):
+            os.remove(unixpath)
+    except PermissionError:
+        logger.error("Unable to delete file %s : Permission Denied!" % unixpath)
+        exit(1)
 
     topics = ast.literal_eval(options.get('topics'))
 
     logger.info("starting akafka daemon...")
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.bind(unixpath)
+    try:
+        sock.bind(unixpath)
+    except FileNotFoundError:
+        logger.error("Path to unix-domain-socket not found: %s" % unixpath)
+        exit(1)
+    except PermissionError:
+        logger.error("Unable to create socket %s : Permission Denied!" % unixpath)
+        exit(1)
+
     ak = Akafka(*topics,**kafka_options)
 
     if options.get('search'):
