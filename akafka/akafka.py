@@ -34,8 +34,7 @@ class Akafka:
 
         self.logger = logging.getLogger(__name__)
 
-        for key in self.config:
-#            if key in configs:
+        for key in configs:
             self.config[key] = configs[key]
 
         self.consumer = None
