@@ -20,5 +20,5 @@ jobs:
           PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKERFILE: "Dockerfile"
           IMAGE_NAME: "aitaecid/akafka"
-          TAG_NAME: "v1.3"
+          TAG_NAME: "v1.4"
           LATEST: "true"

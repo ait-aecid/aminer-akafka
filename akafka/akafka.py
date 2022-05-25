@@ -18,6 +18,7 @@ from dictfilter import query
 class Akafka:
     DEFAULT_CONFIG = {
         'bootstrap_servers': 'localhost:9092',
+        'consumer_timeout_ms': 1000
     }
 
     def __init__(self, *topics, **configs):
@@ -85,8 +86,6 @@ class Akafka:
         """Scheduler-function that polls kafka
 
         """
-        self.consumer = KafkaConsumer(**self.config)
-        self.consumer.subscribe(self.topics)
         try:
             self.sock.send('\n'.encode())
             for msg in self.consumer:
@@ -141,6 +140,9 @@ class Akafka:
             self.stopper = False
             while self.stopper is False:
                 self.logger.debug("Starting another run..")
+
+                self.consumer = KafkaConsumer(**self.config)
+                self.consumer.subscribe(self.topics)
                 self.handler()
         except KeyboardInterrupt:
             self.logger.debug("KeyboardInterrupt detected...")
